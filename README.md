@@ -1,6 +1,6 @@
 # estate-bidding-application
 
-Simple etate bidding application that allows users to add estates and make bids on them.
+Simple etate bidding application that allows users to add estates and register bids.
 
 ## Description
 
