@@ -22,7 +22,7 @@ This is the primary window that the user interacts with.
 
 ![image](https://user-images.githubusercontent.com/87245022/192364974-b868e147-015c-4650-a985-115e01aa4b56.png)
 
-There are multiple actions to pe performed herew
+There are multiple actions to pe performed here:
 - Pressing the **Add New Estate Button** will prompt the user to enter address, asking price and other information and a new estate will be added to the list.
 - Using the leftmost **estate list** will change the information in the window accordingly.
 - The **show all sold/unsold estates button** will display a table containing data on estates that are sold or unsold respectively.
