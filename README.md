@@ -38,4 +38,4 @@ There are multiple actions to pe performed herew
 - [ ] Better input respone when adding a new estate. Example: red when typing a string in a field that expects integer.
 - [ ] Possible to edit estate information by right clicking.
 - [ ] Darkmode??
-- [ ] Jar executable? Currently only runnable through IDE.
+- [x] Jar executable? Currently only runnable through IDE.
