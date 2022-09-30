@@ -6,7 +6,7 @@ If you want to try the program, go in 'out/artifacts..' folder and download the 
 
 ## Description
 
-A few months ago as a school assignment I made an command-line application that would allow users to add estates and register bids. My goal with this project is to further develop that command-line app to a more robust desktop application and with that also learn and practice new techniques. Therefore I try to use the java Collections framework to handle data, Serialization to save the data and JavaFX for the user to have an GUI to interact with. There is still a lot of ways that I want to improve the application, but since I haven't programmed for many months I am still pretty happy with it as I've learned many new concepts along the way.
+A few months ago as a school assignment I made an command-line application that would allow users to add estates and register bids. My goal with this project is to further develop that command-line app to a more robust desktop application and with that also learn and practice new techniques. Therefore I try to use the Java Collections framework to handle data, Serialization to save the data and JavaFX for the user to have a GUI to interact with. There is still a lot of ways that I want to improve the application, but since I haven't programmed for many months I am still pretty happy with it as I've learned many new concepts along the way.
 
 ## Requirements
 
