@@ -1,11 +1,8 @@
 package com.strandhvilliam.estatebiddingapplication;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -14,7 +11,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -57,7 +53,7 @@ public class MainController implements Initializable {
     @FXML
     private TableColumn<Bid, String> amountColumn;
     @FXML
-    private ContextMenu listContextMenu;
+    private ContextMenu listContextMenu = new ContextMenu();
 
     private final ButtonType addButtonType = new ButtonType("Add", ButtonBar.ButtonData.OK_DONE);
     private final ButtonType cancelButtonType = new ButtonType("Cancel", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -65,6 +61,10 @@ public class MainController implements Initializable {
     private final ButtonType okButtonType = new ButtonType("Ok", ButtonBar.ButtonData.OK_DONE);
 
 
+    /**
+     * Method adds new estates to the data class and updates the list view
+     * @param event currently unused
+     */
     @FXML
     private void addNewEstateEvent(ActionEvent event) {
 
@@ -76,19 +76,23 @@ public class MainController implements Initializable {
 
             if (result.isPresent() && result.get() == addButtonType) {
                 NewEstateDialogController controller = fxmlLoader.getController();
-
                 Estate newEstate = controller.processResults();
                 Data.getInstance().addEstate(newEstate);
                 estatesListView.getSelectionModel().select(newEstate);
             }
         } catch (IOException | IllegalArgumentException e) {
             System.out.println("Couldn't load the dialog");
-            displayAlert("Error",e.getMessage());
+            displayAlert("Error", e.getMessage());
         }
     }
 
 
-
+    /**
+     * Adds new bid to selected estate.
+     * Gets the selected estate from listview, initializes the dialog and adds the bid to the estate.
+     * Updates the highest bid label and bidding history table view.
+     * @param event currently unused, probably implement in future
+     */
     @FXML
     public void addNewBidEvent(ActionEvent event) {
         Estate selectedEstate = estatesListView.getSelectionModel().getSelectedItem();
@@ -117,6 +121,11 @@ public class MainController implements Initializable {
         updateEstateInformation(selectedEstate);
     }
 
+    /**
+     * Method ends the bidding process for the selected estate.
+     * Prohibiting further bids to be added and updates the highest bid label.
+     * @param event
+     */
     @FXML
     public void endBiddingProcessEvent(ActionEvent event) {
 
@@ -128,16 +137,10 @@ public class MainController implements Initializable {
             return;
         }
 
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("End bidding process");
-        confirm.setHeaderText("Are you sure you want to end the bidding process?");
-        confirm.getDialogPane().getStylesheets().add(getClass().getResource("dialogstyles.css").toExternalForm());
-        confirm.getButtonTypes().clear();
-        confirm.getButtonTypes().addAll(okButtonType, cancelButtonType);
-        confirm.getDialogPane().lookupButton(okButtonType).setId("okButton");
-        confirm.getDialogPane().lookupButton(cancelButtonType).setId("cancelButton");
-        confirm.showAndWait();
-        if (confirm.getResult() != okButtonType) {
+        ButtonType result = displayConfirmationAlert(
+                "End bidding process", "Are you sure you want to end the bidding process for this estate?");
+
+        if (result != okButtonType) {
             return;
         }
 
@@ -148,10 +151,12 @@ public class MainController implements Initializable {
         } else {
             displayAlert("No bids on this estate", "No bids on this estate");
         }
-
-
     }
 
+    /**
+     * Method opens up dialog displaying a table of all unsold estates
+     * @param event currently unused
+     */
     @FXML
     public void showUnsoldEstatesEvent(ActionEvent event) {
         try {
@@ -165,6 +170,10 @@ public class MainController implements Initializable {
         }
     }
 
+    /**
+     * Method opens up dialog displaying a table of all sold estates
+     * @param event currently unused
+     */
     @FXML
     public void showSoldEstatesEvent(ActionEvent event) {
         try {
@@ -178,32 +187,31 @@ public class MainController implements Initializable {
         }
     }
 
+    /**
+     * Gets bidding history for the parameter estate
+     * @param estate estate to get bidding history for
+     * @return observable list of bids
+     */
     public ObservableList<Bid> getBiddingHistoryObservableList(Estate estate) {
         ObservableList<Bid> biddingHistory = FXCollections.observableArrayList();
         biddingHistory.addAll(estate.getBids());
         return biddingHistory;
     }
 
-
+    /**
+     * Initializes the controller class.
+     * Adds the options in context menu when user right clicks on listview.
+     * Adds listener to update information when user selects an estate.
+     * @param url
+     * @param resourceBundle
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
 
-        MenuItem deleteMenuItem = new MenuItem("Delete");
-        deleteMenuItem.setOnAction(actionEvent -> {
-            Estate selectedEstate = estatesListView.getSelectionModel().getSelectedItem();
-            Data.getInstance().getEstates().remove(selectedEstate);
-            estatesListView.setItems(Data.getInstance().getEstates());
-            if (Data.getInstance().getEstates().size() > 0) {
-                estatesListView.getSelectionModel().selectFirst();
-            } else {
-                updateEstateInformation(new Estate("ADDRESS", "LOCATION", 0L, "TYPE", 0, false, 0, 0, null));
-            }
-        });
-
-        listContextMenu = new ContextMenu();
         listContextMenu.setId("listContextMenu");
-        listContextMenu.getItems().addAll(deleteMenuItem);
+        listContextMenu.getItems().add(initDeleteMenuItem());
 
+        //Sets listview to observable list from data class
         estatesListView.setItems(Data.getInstance().getEstates());
         estatesListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         estatesListView.getSelectionModel().selectedItemProperty().addListener(
@@ -214,16 +222,20 @@ public class MainController implements Initializable {
                 }
         );
         estatesListView.getSelectionModel().selectFirst();
-
     }
 
-
+    /**
+     * Updates the estate information in the estate information pane.
+     * Checks and updates FXML elements in main tab and bidding history tab.
+     * @param estate the estate to view information about
+     */
     public void updateEstateInformation(Estate estate) {
         addressLabel.setText(estate.getAddress());
         locationLabel.setText(estate.getLocation());
         typeLabel.setText(estate.getType());
         DecimalFormat df = new DecimalFormat("###,###,###");
         askingPriceLabel.setText(df.format(estate.getAskingPrice()));
+
         if (estate.hasBid()) {
             highestBidLabel.setText(df.format(estate.getHighestBid().getAmount()));
         } else {
@@ -244,7 +256,8 @@ public class MainController implements Initializable {
         try {
             estateImageView.setImage(new Image(estate.getImageFile().toURI().toString()));
         } catch (NullPointerException e) {
-            File placeHolder = new File("src/main/resources/com/strandhvilliam/estatebiddingapplication/images/placeholderEstate.png");
+            File placeHolder = new File(
+                    "src/main/resources/com/strandhvilliam/estatebiddingapplication/images/placeholderEstate.png");
             estateImageView.setImage(new Image(placeHolder.toURI().toString()));
         }
 
@@ -259,17 +272,25 @@ public class MainController implements Initializable {
         }
     }
 
+    /**
+     * Method that displays dialogpane with a title, a fxml file and a list of buttons.
+     * @param title the title of the dialog
+     * @param fxmlLoader the fxml file to load
+     * @param buttons array with buttons to display
+     * @return the dialog
+     * @throws IOException if the fxml file couldn't be loaded
+     */
     public Dialog<ButtonType> initDialog(String title, FXMLLoader fxmlLoader, ButtonType[] buttons) throws IOException {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.initOwner(mainWindowBorderPane.getScene().getWindow());
         dialog.setTitle(title);
         dialog.getDialogPane().setContent(fxmlLoader.load());
 
+        //adds corresponding id to the buttons depending on the text in button that is set to work with css file
         for (ButtonType button : buttons) {
             dialog.getDialogPane().getButtonTypes().add(button);
             dialog.getDialogPane().lookupButton(button).setId(button.getText().toLowerCase() + "Button");
         }
-
         try {
             dialog.getDialogPane().getStylesheets().add((getClass().getResource("dialogstyles.css")).toString());
         } catch (NullPointerException e) {
@@ -278,11 +299,55 @@ public class MainController implements Initializable {
         return dialog;
     }
 
+    /**
+     * Method that displays an alert with a title and a message
+     * @param title the title of the alert
+     * @param message the message of the alert
+     */
     public void displayAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(message);
         alert.getDialogPane().getStylesheets().add(getClass().getResource("dialogstyles.css").toExternalForm());
         alert.showAndWait();
+    }
+
+    /**
+     * Method that displays a confirmation dialog with a title and a message and checks for user input and
+     * return the result
+     * @param title the title of the confirmation dialog
+     * @param message the message of the confirmation dialog
+     * @return the result of user choice in the confirmation dialog
+     */
+    public ButtonType displayConfirmationAlert(String title, String message) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle(title);
+        confirm.setHeaderText(message);
+        confirm.getDialogPane().getStylesheets().add(getClass().getResource("dialogstyles.css").toExternalForm());
+        confirm.getButtonTypes().clear();
+        confirm.getButtonTypes().addAll(okButtonType, cancelButtonType);
+        confirm.getDialogPane().lookupButton(okButtonType).setId("okButton");
+        confirm.getDialogPane().lookupButton(cancelButtonType).setId("cancelButton");
+        confirm.showAndWait();
+        return confirm.getResult();
+    }
+
+    /**
+     * Method that initializes deletemenuitem and adds listener to it.
+     * @return the delete menuitem object
+     */
+    public MenuItem initDeleteMenuItem() {
+        MenuItem deleteMenuItem = new MenuItem("Delete");
+        deleteMenuItem.setOnAction(actionEvent -> {
+            Estate selectedEstate = estatesListView.getSelectionModel().getSelectedItem();
+            Data.getInstance().deleteEstate(selectedEstate);
+            estatesListView.setItems(Data.getInstance().getEstates());
+            if (Data.getInstance().getEstates().size() > 0) {
+                estatesListView.getSelectionModel().selectFirst();
+            } else {
+                updateEstateInformation(new Estate("ADDRESS", "LOCATION", 0L, "TYPE", 0, false, 0, 0, null));
+            }
+        });
+        return deleteMenuItem;
     }
 }

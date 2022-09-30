@@ -9,27 +9,16 @@ import java.util.List;
 public class Estate implements Serializable {
 
     private String address;
-
     private final String location;
-
     private final Long askingPrice;
-
     private final String type;
-
     private final int floor;
-
     private final boolean balcony;
-
     private final int area;
-
     private final int rooms;
-
     private boolean sold;
-
     private Long winningBid;
-
     private final List<Bid> bids;
-
     private File imageFile;
 
     public Estate(String address, String location, Long askingPrice, String type , int floor, boolean balcony, int area, int rooms, File imageFile) {

@@ -9,18 +9,17 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This singleton class is used to store and retrieve data from the application.
+ */
 public class Data {
-
     private static final Data instance = new Data();
     private static final String filename = "estates.ser";
     private ObservableList<Estate> estates = FXCollections.observableArrayList();
-
     private List<Estate> estatesList;
-
     public static Data getInstance() {
         return instance;
     }
-
     public ObservableList<Estate> getEstates() {
         return estates;
     }
@@ -28,7 +27,6 @@ public class Data {
     public void addEstate(Estate estate) {
         estates.add(estate);
     }
-
     public void deleteEstate(Estate estate) {
         estates.remove(estate);
     }
